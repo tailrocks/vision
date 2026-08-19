@@ -302,8 +302,11 @@ None of this is theoretical — ChainArgos runs the stack daily:
   GitHub-hosted runners, while builds get faster.
 - **ruxel** provisions and updates those machines in seconds, replacing slow
   Ansible runs.
-- **schemalane** migrates the databases; **tablerock** inspects them;
-  **termrock** and **holla** tie the daily workflows together.
+- **schemalane** migrates the databases, forward-only.
+- **tablerock** inspects the databases, from macOS and the terminal.
+- **termrock** provides the shared TUI components behind the terminal
+  interfaces.
+- **holla** ties the daily local workflows together.
 
 Every product exists because a real operational need had no adequate
 open-source answer — and every product earns its place in production before
