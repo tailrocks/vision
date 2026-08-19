@@ -119,10 +119,16 @@ the ecosystem layer *around* all of them.
   archaeology. Say "work on this task" and the right role picks it up.
 - **Runs anywhere you control.** Your laptop, your cloud account, your
   dedicated servers. Pause work on a MacBook, continue on a server — the
-  environment moves with the task, not with the machine.
-- **One interface.** An operator console (TUI today, desktop app next) gives
-  full visibility and control over every running agent — including reaching
-  you on your phone when an agent is stuck and needs a decision.
+  environment moves with the task, not with the machine. Agents will mostly
+  run on scalable cloud infrastructure or someone's server clusters, not on a
+  desktop — jackin is designed for that world from day one.
+- **One control plane.** Like `kubectl`/`kubectx` for Kubernetes, jackin is
+  the single pane over every agent you run: how many servers, which agents,
+  where they run, what they do — including token and subscription balances
+  per provider account, in one panel. Available as a TUI (the native way to
+  inspect servers), a native macOS desktop app, and reachable from your phone
+  when an agent is stuck and needs a decision — with Touch ID authorization
+  for sensitive actions like granting access mid-task.
 
 Conceptually close to what [Amp](https://ampcode.com/) does with Orbs — but
 fully open source, self-hostable on your own infrastructure, and
@@ -163,14 +169,23 @@ runner, executing each job in Docker, and running the known action surface
 through native Rust adapters. Faster, cheaper, and far more informative than
 GitHub-hosted runners.
 
+The economics matter more with agents: pull request and feature volume grows
+dramatically when agents write the code, and paying GitHub-hosted runner
+prices for that volume is the wrong default. Velnor lets ChainArgos run CI on
+beefy dedicated Hetzner machines at a fraction of the cost — and builds get
+*faster*, not just cheaper.
+
 ### [ruxel](https://github.com/tailrocks/ruxel) — provisioning without the YAML archaeology
 
 A drop-in, performance-first Rust executor for the Ansible workload that
 provisions and maintains ChainArgos' dedicated servers — same playbooks, same
 inventory, same invocation shape. A converged server answers "0 changed,
 verified" in seconds instead of ~15 minutes; a drifted server gets exactly the
-drifted tasks re-applied; no Python on any target, ever. This is how the
-servers that run jackin and parallax get provisioned.
+drifted tasks re-applied; no Python on any target, ever. Ansible has a great
+user experience but is far slower than the problem requires — and when CI
+moves to dedicated machines (see velnor), provisioning and updating those
+machines fast becomes critical. This is how the servers that run jackin,
+parallax, and velnor get provisioned.
 
 ### [termrock](https://github.com/tailrocks/termrock) — the TUI design system
 
@@ -202,6 +217,58 @@ what is actually installed on your machine, then shows an interactive menu of
 exactly what you can do. No config, no setup — the friendly front door to the
 whole toolchain.
 
+## Three surfaces: terminal first, then desktop, then phone
+
+Agents will mostly run on scalable infrastructure — cloud accounts, dedicated
+server clusters — not on desktop computers. The way you operate that world is
+the way Kubernetes operators already work: `kubectl` and `kubectx` are the
+control plane, and the terminal is where you go to see what is happening on a
+server. So our products are built in that order:
+
+1. **TUI first.** Every product ships a terminal interface before anything
+   else. The leading agent runtimes prove the pattern — Claude Code and Codex
+   land their deepest features in the TUI long before their desktop apps. A
+   TUI is the fastest way to monitor and manage fleets of agents and servers
+   without the cost of building native apps for every platform, which is why
+   we built termrock as the shared component layer for all of them.
+2. **Native macOS desktop.** For monitoring, managing, and reviewing at a
+   glance, a desktop app is more convenient — the same reason cloud providers
+   ship desktop consoles. jackin and tablerock lead here, including Touch ID
+   authorization for sensitive operations.
+3. **Phone.** Engineers on the move still need to verify what agents are
+   doing and unblock them. When an agent is stuck, you should be able to
+   decide from your phone — not from a server room.
+
+We believe future engineering teams will have **more agents than developers**.
+Agents become first-class citizens doing the work; people validate, monitor,
+and decide. Every surface we build is designed for that ratio.
+
+One more piece of shared plumbing: **credentials**. Everywhere our software
+connects to something sensitive, [1Password](https://1password.com/) is the
+provider — credentials are stored, located, and used the same way across
+every Tailrocks product, with proper password management instead of scattered
+config files.
+
+## Why Rust
+
+Everything we build is Rust. Not from fashion — from fit with the AI era:
+
+- **Rust is the best language for AI-written code.** Its compiler puts more
+  constraints into the language than any other mainstream option, and those
+  constraints are exactly what makes model-generated code higher quality:
+  more stable, more predictable, and needing fewer iterations to flush out
+  hidden bugs. The type system does the code review.
+- **Near-best achievable performance** with minimal resource use — which is
+  what makes cheap observability (parallax), fast CI (velnor), and
+  seconds-fast provisioning (ruxel) possible at all.
+- **Production-ready and stable.** The only real alternative on performance
+  grounds is Zig, but it remains a niche ecosystem; Rust is the pragmatic
+  choice that is already proven at scale.
+
+One language for writing, deploying, and managing everything also means the
+whole stack — TUI, core logic, FFI to native apps — shares code, which is how
+a small team maintains an ecosystem this size.
+
 ## Why agents need this stack
 
 The evidence is already public. [robobun](https://github.com/robobun) — the
@@ -224,6 +291,23 @@ in CI, **ruxel** provisions where it all runs, and **termrock**, **holla**,
 **tablerock**, and **schemalane** make the surrounding workflows fast and
 consistent. Integrated out of the box, self-hosted everywhere, no vendor
 lock-in on agent, model, or cloud.
+
+## Dogfooding at ChainArgos
+
+None of this is theoretical — ChainArgos runs the stack daily:
+
+- **jackin** runs all coding agents isolated, at full speed.
+- **parallax** stores all observability — and saves real money doing it.
+- **velnor** runs CI on dedicated Hetzner machines instead of paying for
+  GitHub-hosted runners, while builds get faster.
+- **ruxel** provisions and updates those machines in seconds, replacing slow
+  Ansible runs.
+- **schemalane** migrates the databases; **tablerock** inspects them;
+  **termrock** and **holla** tie the daily workflows together.
+
+Every product exists because a real operational need had no adequate
+open-source answer — and every product earns its place in production before
+anyone else is asked to trust it.
 
 ## The business model: open source, managed experience
 
