@@ -74,30 +74,30 @@ integrated system for AI-native software development:
 
 ```mermaid
 graph TD
-    subgraph Your infrastructure — any cloud, dedicated servers, or laptop
-        J[jackin — agent orchestration & isolation]
-        P[parallax — observability & agent context engine]
-        V[velnor — CI runner]
-        R[ruxel — server provisioning]
-        T[tablerock — database workbench]
-        S[schemalane — database migrations]
+    subgraph infra["Your infrastructure — any cloud, dedicated servers, or laptop"]
+        J["jackin — agent orchestration & isolation"]
+        P["parallax — observability & agent context engine"]
+        V["velnor — CI runner"]
+        R["ruxel — server provisioning"]
+        T["tablerock — database workbench"]
+        S["schemalane — database migrations"]
     end
 
-    subgraph Foundation
-        TR[termrock — TUI design system]
-        H[holla — adaptive dev environment]
+    subgraph foundation["Foundation"]
+        TR["termrock — TUI design system"]
+        H["holla — adaptive dev environment"]
     end
 
-    J -->|agents read logs, traces, metrics| P
-    P -->|evidence bundles for fixes| J
-    V -->|runs CI for| J
-    V -->|runs CI for| P
-    R -->|provisions hosts for| J
-    R -->|provisions hosts for| P
-    TR -->|powers the TUIs of| J
-    TR -->|powers the TUIs of| T
-    S -->|migrates databases inspected by| T
-    H -->|entry point to everything| J
+    J -->|"agents read logs, traces, metrics"| P
+    P -->|"evidence bundles for fixes"| J
+    V -->|"runs CI for"| J
+    V -->|"runs CI for"| P
+    R -->|"provisions hosts for"| J
+    R -->|"provisions hosts for"| P
+    TR -->|"powers the TUIs of"| J
+    TR -->|"powers the TUIs of"| T
+    S -->|"migrates databases inspected by"| T
+    H -->|"entry point to everything"| J
 ```
 
 ### [jackin](https://github.com/jackin-project/jackin) — run AI agents at full speed, safely
